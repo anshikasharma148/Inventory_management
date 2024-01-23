@@ -13,7 +13,7 @@ app.get("/", (req, res) => {
 
 //mongodb config
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri =
   "mongodb+srv://minor_18:minor@cluster0.sv78nii.mongodb.net/?retryWrites=true&w=majority";
 
@@ -40,6 +40,57 @@ async function run() {
       const result = await bookCollections.insertOne(data);
       res.send(result);
     });
+
+    // GET ALL BOOKS FROM DB
+    app.get("/all-books", async (req, res) => {
+      const books = bookCollections.find();
+      const result = await books.toArray();
+      res.send(result);
+    });
+
+    // UPDATE A BOOK FROM DB
+    app.patch("/book/:id", async (req, res) => {
+      const id = req.params.id;
+      // console.log(id);
+      const updateBookData = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const options = { upsert: true };
+
+      const updateDoc = {
+        $set: {
+          ...updateBookData,
+        },
+      };
+
+      // update
+      const result = await bookCollections.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
+
+    //delete a book
+
+    app.delete("/book/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const result = await bookCollections.deleteOne(filter);
+      res.send(result);
+    });
+
+    //find by category
+    app.get("/all-books", async (req, res) => {
+      let query = {};
+      if (req.query?.category) {
+        query = { category: req.query.category };
+      }
+
+      const result = await bookCollections.find(query).toArray();
+      res.send(result);
+    });
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
