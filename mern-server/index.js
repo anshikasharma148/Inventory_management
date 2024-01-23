@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
 
 const { MongoClient, ServerApiVersion } = require("mongodb");
 const uri =
-  "mongodb+srv://mern-book-store:Minor05@cluster0.epbgptw.mongodb.net/?retryWrites=true&w=majority";
+  "mongodb+srv://minor_18:minor@cluster0.sv78nii.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -30,6 +30,16 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    // create a collection for database
+    const bookCollections = client.db("BookInventory").collection("books");
+
+    // inserting a book to db : using post method
+    app.post("/upload-book", async (req, res) => {
+      const data = req.body;
+      const result = await bookCollections.insertOne(data);
+      res.send(result);
+    });
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
